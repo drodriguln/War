@@ -33,7 +33,7 @@ public class Main {
         playerOne.setDeck(splitDeck(shuffledDeck, 0, shuffledDeck.size()/2));
         playerTwo.setDeck(splitDeck(shuffledDeck, shuffledDeck.size()/2, shuffledDeck.size()));
 
-        //Initiate War.
+        //Initiate game.
         beginGame(playerOne, playerTwo);
 
     }
@@ -113,21 +113,37 @@ public class Main {
                 two.popDeck();
             } else if (cardOne == cardTwo) {
                 //CASE: A draw. Both players must initiate War (see "startWar" method for details).
-                System.out.println(cardOne + "\t==\t" + cardTwo + "\tWAR!\t--->\t" + "PLAYER ONE: Deck\t" + one.getDeck().size() + "\tPile\t" + one.getPile().size() + "\t|\t" + "PLAYER TWO: Deck\t" + two.getDeck().size() + "\tPile\t" + two.getPile().size());
-                startWar(one, two);
-        }
+                //      If either of the players do not have at least one extra cards in their decks, the pile is added then shuffled.
+                System.out.println(one.getTopCard() + "\t==\t" + two.getTopCard() + "\t--->\t" + "PLAYER ONE: Deck\t" + one.getDeck().size() + "\tPile\t" + one.getPile().size() + "\t|\t" + "PLAYER TWO: Deck\t" + two.getDeck().size() + "\tPile\t" + two.getPile().size());
+                if (one.getDeck().size() <= 2 && !one.getPile().isEmpty()) {
+                    addPileToDeckForWar(one);
+                    System.out.println("ADDED PILE\t--->\tPLAYER ONE: Deck\t" + one.getDeck().size() + "\tPile\t" + one.getPile().size());
+                }
+                if (two.getDeck().size() <= 2 && !two.getPile().isEmpty()) {
+                    addPileToDeckForWar(two);
+                    System.out.println("ADDED PILE\t--->\tPLAYER TWO: Deck\t" + two.getDeck().size() + "\tPile\t" + two.getPile().size());
+                }
+                if (one.getDeck().size() > 2 && two.getDeck().size() > 1) {
+                    System.out.println("\tWAR!\t--->\tPLAYER ONE: Deck\t" + one.getDeck().size() + "\tPile\t" + one.getPile().size() + "\t|\t" + "PLAYER TWO: Deck\t" + two.getDeck().size() + "\tPile\t" + two.getPile().size());
+                    startWar(one, two);
+                } else if (one.getDeck().size() <= 2) {
+                    //Not enough cards for a War. Default to game over for player one.
+                    System.out.println("PLAYER ONE RAN OUT OF CARDS. ENDING GAME.");
+                    two.addPile(one.getDeck());
+                    one.setDeck(new Stack<Integer>());
+                    one.setPile(new Stack<Integer>());
+                } else if (two.getDeck().size() <= 2) {
+                    //Not enough cards for a War. Default to game over for player two.
+                    System.out.println("PLAYER TWO RAN OUT OF CARDS. ENDING GAME.");
+                    one.addPile(two.getDeck());
+                    two.setDeck(new Stack<Integer>());
+                    two.setPile(new Stack<Integer>());
+                }
+            }
 
-        //If player one's deck is empty, then add the cards from the pile to it and create a new pile object.
-        if (one.getDeck().isEmpty()) {
-            one.setDeck(one.getPile());
-            one.setPile(new Stack<Integer>());
-        }
-
-            //If player two's deck is empty, then add the cards from the pile to it and create a new pile object.
-        if (two.getDeck().isEmpty()) {
-            two.setDeck(two.getPile());
-            two.setPile(new Stack<Integer>());
-        }
+        //If either players' deck is empty, then add the cards from the pile to it and create a new pile object. The deck is shuffled.
+        if (one.getDeck().isEmpty() && !one.getPile().isEmpty()) { addPileToDeck(one); }
+        if (two.getDeck().isEmpty() && !two.getPile().isEmpty()) { addPileToDeck(two); }
 
     }
 
@@ -138,7 +154,7 @@ public class Main {
         else if (two.getDeck().isEmpty()) { System.out.println("PLAYER ONE WINS!"); }
         else { System.out.println("THE GAME ENDS IN A DRAW!"); }
         System.out.println();
-        System.out.println("-- RESULTS --");
+        System.out.println("-- FINAL STATS --");
         System.out.println("PLAYER ONE:");
         System.out.println(" - Cards Left in Deck = " + one.getDeck().size());
         System.out.println(" - Cards in Pile = " + one.getPile().size());
@@ -168,7 +184,7 @@ public class Main {
         int topWarCardTwo;
 
         //Begin War loop.
-        while (warWon) {
+        while (!warWon) {
 
             //If player one has enough cards (at least two), proceed normally. Otherwise pull just one card.
             if (one.getDeck().size() >= 2) {
@@ -198,17 +214,47 @@ public class Main {
 
             //Determines which player wins the War. The winner takes both War piles.
             if (topWarCardOne > topWarCardTwo) {
-                one.getDeck().addAll(warOne);
-                one.getDeck().addAll(warTwo);
+                one.addPile(warOne);
+                one.addPile(warTwo);
                 warWon = true;
             } else if (topWarCardOne < topWarCardTwo) {
-                two.getDeck().addAll(warOne);
-                two.getDeck().addAll(warTwo);
+                two.addPile(warOne);
+                two.addPile(warTwo);
+                warWon = true;
+            } else if (topWarCardOne == topWarCardTwo && !one.getDeck().isEmpty()) {
+                addPileToDeckForWar(one);
+            } else if (topWarCardOne == topWarCardTwo && !two.getDeck().isEmpty()) {
+                addPileToDeckForWar(two);
+            } else if (topWarCardOne == topWarCardTwo && one.getDeck().isEmpty()) {
+                two.addPile(warOne);
+                two.addPile(warTwo);
+                warWon = true;
+            } else if (topWarCardOne == topWarCardTwo && two.getDeck().isEmpty()) {
+                one.addPile(warOne);
+                one.addPile(warTwo);
                 warWon = true;
             }
 
         }
 
+    }
+
+    public static void addPileToDeck(Player player) {
+        player.setDeck(player.getPile());
+        Collections.shuffle(player.getDeck());
+        player.setPile(new Stack<Integer>());
+    }
+
+    public static void addPileToDeckForWar(Player player) {
+        //Store last card to variable, shuffle the pile, add the last card to the pile,
+        //then add the pile to the remaining deck.
+        int lastCard = (Integer) player.getTopCard();
+        player.popDeck();
+        Collections.shuffle(player.getPile());
+        if (!player.getDeck().isEmpty()) { player.addPile(player.getDeck()); }
+        player.pushToPile(lastCard);
+        player.setDeck(player.getPile());
+        player.setPile(new Stack<Integer>());
     }
 
 }

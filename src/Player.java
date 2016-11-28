@@ -36,4 +36,8 @@ public class Player {
         return deck.peek();
     }
 
+    public void addPile(Stack<Integer> stack) {
+        pile.addAll(stack);
+    }
+
 }
