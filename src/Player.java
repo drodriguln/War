@@ -1,8 +1,9 @@
 import java.util.Stack;
 
 /**
- * Created by Daniel on 11/27/16.
+ * Created by Daniel A. Rodriguez on 11/27/16.
  */
+
 public class Player {
 
     private Stack deck;

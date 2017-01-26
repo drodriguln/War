@@ -1,7 +1,7 @@
 import java.util.*;
 
 /**
- * Created by Daniel on 11/27/16.
+ * Created by Daniel A. Rodriguez on 11/27/16.
  *
  * NOTES:
  * - Suits will be disregarded since War does not rely on them.
@@ -123,7 +123,7 @@ public class Main {
                     addPileToDeckForWar(two);
                     System.out.println("ADDED PILE\t--->\tPLAYER TWO: Deck\t" + two.getDeck().size() + "\tPile\t" + two.getPile().size());
                 }
-                if (one.getDeck().size() > 2 && two.getDeck().size() > 1) {
+                if (one.getDeck().size() > 2 && two.getDeck().size() > 2) {
                     System.out.println("\tWAR!\t--->\tPLAYER ONE: Deck\t" + one.getDeck().size() + "\tPile\t" + one.getPile().size() + "\t|\t" + "PLAYER TWO: Deck\t" + two.getDeck().size() + "\tPile\t" + two.getPile().size());
                     startWar(one, two);
                 } else if (one.getDeck().size() <= 2) {
@@ -221,10 +221,6 @@ public class Main {
                 two.addPile(warOne);
                 two.addPile(warTwo);
                 warWon = true;
-            } else if (topWarCardOne == topWarCardTwo && !one.getDeck().isEmpty()) {
-                addPileToDeckForWar(one);
-            } else if (topWarCardOne == topWarCardTwo && !two.getDeck().isEmpty()) {
-                addPileToDeckForWar(two);
             } else if (topWarCardOne == topWarCardTwo && one.getDeck().isEmpty()) {
                 two.addPile(warOne);
                 two.addPile(warTwo);
